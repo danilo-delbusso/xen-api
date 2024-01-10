@@ -43,7 +43,8 @@ import java.net.URL;
  * method call, and dispatches it on the Connection's client via the dispatch method.
  */
 public class Connection {
-    private final JsonRpcClient client;
+
+    public final JsonRpcClient client;
     private APIVersion apiVersion;
     /**
      * The opaque reference to the session used by this connection
@@ -76,11 +77,15 @@ public class Connection {
      * logging out the Session.
      *
      * @param httpClient     The HttpClient used to make calls, this will be used by JsonRpcClient for handling requests
-     * @param url            The URL of the server to connect to. Should be of the form http(s)://host-url./jsonrpc or http(s)://host-url.
+     * @param url            The URL of the server to connect to. Should be of the form http(s)://host-url/jsonrpc or http(s)://host-url.
      * @param requestTimeout The reply timeout for JSON-RPC calls in seconds
+     * @deprecated This constructor is deprecated. To set the {@code requestTimeout} please use the {@link com.xensource.xenapi.JsonRpcClient#setRequestTimeout(int)}
+     * method of this object's {@link #client}.
      */
+    @Deprecated
     public Connection(CloseableHttpClient httpClient, URL url, int requestTimeout) {
-        this.client = new JsonRpcClient(httpClient, url, requestTimeout);
+        this.client = new JsonRpcClient(httpClient, url);
+        this.client.setRequestTimeout(requestTimeout);
     }
 
     /**
@@ -96,7 +101,7 @@ public class Connection {
      * This constructor uses the default values of the reply and connection timeouts for the JSON-RPC calls
      * (600 seconds and 5 seconds respectively).
      *
-     * @param url The URL of the server to connect to. Should be of the form http(s)://host-url./jsonrpc or http(s)://host-url.
+     * @param url The URL of the server to connect to. Should be of the form http(s)://host-url/jsonrpc or http(s)://host-url.
      */
     public Connection(URL url) {
         this.client = new JsonRpcClient(url);
@@ -112,12 +117,17 @@ public class Connection {
      * When this constructor is used, a call to dispose() will do nothing. The programmer is responsible for manually
      * logging out the Session.
      *
-     * @param url               The URL of the server to connect to. Should be of the form http(s)://host-url./jsonrpc or http(s)://host-url.
+     * @param url               The URL of the server to connect to. Should be of the form http(s)://host-url/jsonrpc or http(s)://host-url.
      * @param requestTimeout    The reply timeout for JSON-RPC calls in seconds
      * @param connectionTimeout The connection timeout for JSON-RPC calls in seconds
+     * @deprecated This constructor is deprecated. To set the {@code connectionTimeout} please use the {@link com.xensource.xenapi.JsonRpcClient#setConnectionTimeout(int)}
+     * method of this object's {@link #client}.
      */
+    @Deprecated
     public Connection(URL url, int requestTimeout, int connectionTimeout) {
-        this.client = new JsonRpcClient(url, requestTimeout, connectionTimeout);
+        this.client = new JsonRpcClient(url);
+        this.client.setRequestTimeout(requestTimeout);
+        this.client.setConnectionTimeout(connectionTimeout);
     }
 
     /**
@@ -133,7 +143,7 @@ public class Connection {
      * This constructor uses the default values of the reply and connection timeouts for the JSON-RPC calls
      * (600 seconds and 5 seconds respectively).
      *
-     * @param url              The URL of the server to connect to. Should be of the form http(s)://host-url./jsonrpc or http(s)://host-url.
+     * @param url              The URL of the server to connect to. Should be of the form http(s)://host-url/jsonrpc or http(s)://host-url.
      * @param sessionReference A reference to a logged-in Session. Any method calls on this
      *                         Connection will use it. This constructor does not call Session.loginWithPassword, and dispose() on the resulting
      *                         Connection object does not call Session.logout. The programmer is responsible for ensuring the Session is logged
@@ -154,16 +164,22 @@ public class Connection {
      * When this constructor is used, a call to dispose() will do nothing. The programmer is responsible for manually
      * logging out the Session.
      *
-     * @param url               The URL of the server to connect to. Should be of the form http(s)://host-url./jsonrpc or http(s)://host-url.
+     * @param url               The URL of the server to connect to. Should be of the form http(s)://host-url/jsonrpc or http(s)://host-url.
      * @param sessionReference  A reference to a logged-in Session. Any method calls on this Connection will use it.
      *                          This constructor does not call Session.loginWithPassword, and dispose() on the resulting
      *                          Connection object does not call Session.logout. The programmer is responsible for
      *                          ensuring the Session is logged in and out correctly.
      * @param requestTimeout    The reply timeout for JSON-RPC calls in seconds
      * @param connectionTimeout The connection timeout for JSON-RPC calls in seconds
+     * @deprecated This constructor is deprecated. To set values for {@code requestTimeout} and {@code connectionTimeout} please use the
+     * {@link com.xensource.xenapi.JsonRpcClient#setRequestTimeout(int)} and {@link com.xensource.xenapi.JsonRpcClient#setConnectionTimeout(int)}
+     * method of this object's {@link #client} respectively.
      */
+    @Deprecated
     public Connection(URL url, String sessionReference, int requestTimeout, int connectionTimeout) {
-        this.client = new JsonRpcClient(url, requestTimeout, connectionTimeout);
+        this.client = new JsonRpcClient(url);
+        this.client.setRequestTimeout(requestTimeout);
+        this.client.setConnectionTimeout(connectionTimeout);
         this.sessionReference = sessionReference;
     }
 
@@ -196,13 +212,13 @@ public class Connection {
     /**
      * Send a method call to xapi's backend. You need to provide the type of the data returned by a successful response.
      *
-     * @param methodCall            the JSON-RPC xapi method call. e.g.: session.login_with_password
-     * @param methodParameters      the methodParameters of the method call
-     * @param responseTypeReference the type of the response, wrapped with a TypeReference
+     * @param methodCall            The JSON-RPC xapi method call. e.g.: session.login_with_password
+     * @param methodParameters      The methodParameters of the method call
+     * @param responseTypeReference The type of the response, wrapped with a TypeReference
      * @param <T>                   The type of the response's payload. For instance, a map of opaque references to VM objects is expected when calling VM.get_all_records
      * @return The result of the call with the type specified under T.
-     * @throws XenAPIException         if the call failed.
-     * @throws IOException             if an I/O error occurs when sending or receiving, includes cases when the request's payload or the response's payload cannot be written or read as valid JSON.
+     * @throws XenAPIException if the call failed.
+     * @throws IOException     if an I/O error occurs when sending or receiving, includes cases when the request's payload or the response's payload cannot be written or read as valid JSON.
      */
     public <T> T dispatch(String methodCall, Object[] methodParameters, TypeReference<T> responseTypeReference) throws XenAPIException, IOException {
         var result = client.sendRequest(methodCall, methodParameters, responseTypeReference);
@@ -228,8 +244,8 @@ public class Connection {
      *
      * @param methodCall       the JSON-RPC xapi method call. e.g.: session.login_with_password
      * @param methodParameters the methodParameters of the method call
-     * @throws XenAPIException         if the call failed.
-     * @throws IOException             if an I/O error occurs when sending or receiving, includes cases when the request's payload or the response's payload cannot be written or read as valid JSON.
+     * @throws XenAPIException if the call failed.
+     * @throws IOException     if an I/O error occurs when sending or receiving, includes cases when the request's payload or the response's payload cannot be written or read as valid JSON.
      */
     public <T> void dispatch(String methodCall, Object[] methodParameters) throws XenAPIException, IOException {
         var typeReference = new TypeReference<T>() {
