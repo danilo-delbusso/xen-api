@@ -190,13 +190,17 @@ public class Connection {
         return apiVersion;
     }
 
-    private void setAPIVersion(Session session) throws IOException {
+    private void setAPIVersion() throws IOException {
+        apiVersion = APIVersion.UNKNOWN;
         try {
-            long major = session.getThisHost(this).getAPIVersionMajor(this);
-            long minor = session.getThisHost(this).getAPIVersionMajor(this);
-            apiVersion = APIVersion.fromMajorMinor(major, minor);
+            var pools = Pool.getAllRecords(this);
+            var pool = pools.values().stream().findFirst();
+            if(pool.isPresent()){
+                var host = pool.get().master.getRecord(this);
+                apiVersion = APIVersion.fromMajorMinor(host.APIVersionMajor, host.APIVersionMinor);
+            }
         } catch (BadServerResponse exn) {
-            apiVersion = APIVersion.UNKNOWN;
+            // ignore, we default to UNKNOWN
         }
     }
 
@@ -229,7 +233,7 @@ public class Connection {
         if (methodCall.equals("session.login_with_password")) {
             var session = ((Session) result.result);
             sessionReference = session.ref;
-            setAPIVersion(session);
+            setAPIVersion();
         } else if (methodCall.equals("session.slave_local_login_with_password")) {
             var session = ((Session) result.result);
             sessionReference = session.ref;
