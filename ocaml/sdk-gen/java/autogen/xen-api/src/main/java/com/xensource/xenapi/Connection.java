@@ -79,8 +79,8 @@ public class Connection {
      * @param httpClient     The HttpClient used to make calls, this will be used by JsonRpcClient for handling requests
      * @param url            The URL of the server to connect to. Should be of the form http(s)://host-url/jsonrpc or http(s)://host-url.
      * @param requestTimeout The reply timeout for JSON-RPC calls in seconds
-     * @deprecated This constructor is deprecated. To set the {@code requestTimeout} please use the {@link com.xensource.xenapi.JsonRpcClient#setRequestTimeout(int)}
-     * method of this object's {@link #client}.
+     * @deprecated           This constructor is deprecated. To set the {@code requestTimeout} please use the {@link com.xensource.xenapi.JsonRpcClient#setRequestTimeout(int)}
+     *                       method of this object's {@link #client}.
      */
     @Deprecated
     public Connection(CloseableHttpClient httpClient, URL url, int requestTimeout) {
@@ -120,8 +120,8 @@ public class Connection {
      * @param url               The URL of the server to connect to. Should be of the form http(s)://host-url/jsonrpc or http(s)://host-url.
      * @param requestTimeout    The reply timeout for JSON-RPC calls in seconds
      * @param connectionTimeout The connection timeout for JSON-RPC calls in seconds
-     * @deprecated This constructor is deprecated. To set the {@code connectionTimeout} please use the {@link com.xensource.xenapi.JsonRpcClient#setConnectionTimeout(int)}
-     * method of this object's {@link #client}.
+     * @deprecated              This constructor is deprecated. To set the {@code connectionTimeout} please use the {@link com.xensource.xenapi.JsonRpcClient#setConnectionTimeout(int)}
+     *                          method of this object's {@link #client}.
      */
     @Deprecated
     public Connection(URL url, int requestTimeout, int connectionTimeout) {
@@ -171,9 +171,9 @@ public class Connection {
      *                          ensuring the Session is logged in and out correctly.
      * @param requestTimeout    The reply timeout for JSON-RPC calls in seconds
      * @param connectionTimeout The connection timeout for JSON-RPC calls in seconds
-     * @deprecated This constructor is deprecated. To set values for {@code requestTimeout} and {@code connectionTimeout} please use the
-     * {@link com.xensource.xenapi.JsonRpcClient#setRequestTimeout(int)} and {@link com.xensource.xenapi.JsonRpcClient#setConnectionTimeout(int)}
-     * method of this object's {@link #client} respectively.
+     * @deprecated              This constructor is deprecated. To set values for {@code requestTimeout} and {@code connectionTimeout} please use the
+     *                          {@link com.xensource.xenapi.JsonRpcClient#setRequestTimeout(int)} and {@link com.xensource.xenapi.JsonRpcClient#setConnectionTimeout(int)}
+     *                          method of this object's {@link #client} respectively.
      */
     @Deprecated
     public Connection(URL url, String sessionReference, int requestTimeout, int connectionTimeout) {
