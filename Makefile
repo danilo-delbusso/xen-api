@@ -112,11 +112,16 @@ sdk:
 	sh ocaml/sdk-gen/windows-line-endings.sh $(XAPISDK)/csharp
 	sh ocaml/sdk-gen/windows-line-endings.sh $(XAPISDK)/powershell
 
-# workaround for no .resx generation, just for compilation testing
-sdksanity: sdk
-	sed -i 's/FriendlyErrorNames.ResourceManager/null/g' ./_build/install/default/xapi/sdk/csharp/src/Failure.cs
-	cd _build/install/default/xapi/sdk/csharp/src && dotnet add package Newtonsoft.Json && dotnet build -f netstandard2.0
+# Cannot pass version number with a "v" prefix
+XAPI_VERSION_CLEAN := $(shell echo $(XAPI_VERSION) | sed 's/^v//')
 
+build-csharp-sdk: sdk
+	cd _build/install/default/xapi/sdk/csharp/src && \
+	dotnet build \
+		--disable-build-servers \
+		--configuration Release \
+		-p:Version=$(XAPI_VERSION_CLEAN)-prerelease-unsigned \
+		--verbosity=normal
 
 python:
 	$(MAKE) -C scripts/examples/python build
