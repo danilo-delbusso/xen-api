@@ -1,0 +1,29 @@
+name: Genrate and build SDKs
+description: Generate and build SDKs (excl. Python). Currently only builds the C# SDK. Ensure you are running this action after setting up a XenAPI environment.
+
+inputs:
+  xapi_version:
+    description: "XenAPI version. e.g.: v24.1.0"
+    required: true
+runs:
+  using: "composite"
+  steps:
+    - name : Set env variables
+      shell : bash
+      run: echo "XAPI_VERSION=${{inputs.xapi_version}}" >> $XAPI_VERSION
+
+    - name: Set up dotnet CLI
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: "6"
+
+    - name: Generate SDKs
+      shell: bash
+      run: |
+        mkdir -p /opt/xensource/sm
+        wget -O /opt/xensource/sm/XE_SR_ERRORCODES.xml https://raw.githubusercontent.com/xapi-project/sm/master/drivers/XE_SR_ERRORCODES.xml
+        opam exec -- make sdk
+
+    - name: Build .NET SDK
+      shell: bash
+      run: opam exec -- make build-csharp-sdk
