@@ -37,36 +37,9 @@ jobs:
 
   build-sdks:
     name: Build and upload SDK artifacts
-    runs-on: ubuntu-latest
-    env:
-      XAPI_VERSION: ${{ github.ref_name }}
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-
-      - name: Setup XenAPI environment
-        uses: ./.github/workflows/setup-xapi-environment
-        with:
-          xapi_version: ${{ env.XAPI_VERSION }}
-
-      - name: Generate and build SDKs
-        uses: ./.github/workflows/generate-and-build-sdks
-        with:
-          xapi_version: ${{ env.XAPI_VERSION }}
-
-      - name: Store C# SDK distribution artifacts
-        uses: actions/upload-artifact@v3
-        with:
-          name: XenServer.NET
-          path: _build/install/default/xapi/sdk/csharp/src/bin/Release/*-prerelease-unsigned.nupkg
-
-      - name: Uninstall unversioned packages and remove pins
-        # This should purge them from the cache, unversioned package have
-        # 'master' as its version
-        run: |
-          opam list | awk -F " " '$2 == "master" { print $1 }' |  xargs opam uninstall
-          opam pin list | cut -f1 -d "." | xargs opam unpin
+    uses: ./.github/workflows/generate-and-build-sdks.yml
+    with:
+      xapi_version: ${{ github.ref_name.replace('v', '') }}
 
   release:
     name: "Create and package release"
@@ -82,7 +55,19 @@ jobs:
       - name: Retrieve C# SDK distribution artifacts
         uses: actions/download-artifact@v3
         with:
-          name: XenServer.NET
+          name: SDK_Binaries_CSharp
+          path: dist/
+
+      - name: Retrieve PowerShell 5.x SDK distribution artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: XenServerPowerShell_NET45
+          path: dist/
+
+      - name: Retrieve PowerShell 7.x SDK distribution artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: XenServerPowerShell_NET8
           path: dist/
 
       - name: Create release ${{ github.ref_name }}
