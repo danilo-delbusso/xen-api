@@ -73,12 +73,6 @@ jobs:
     runs-on: ubuntu-latest
     needs: [build-python, build-sdks]
     steps:
-      - name: Retrieve python distribution artifacts
-        uses: actions/download-artifact@v3
-        with:
-          name: XenAPI
-          path: dist/
-
       - name: Retrieve Python SDK distribution artifacts
         uses: actions/download-artifact@v3
         with:
