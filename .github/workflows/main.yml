@@ -128,11 +128,6 @@ jobs:
         run: opam exec -- make stresstest
         if: ${{ github.event_name == 'schedule' }}
 
-      - name: Generate and build SDKs
-        uses: ./.github/workflows/generate-and-build-sdks
-        with:
-          xapi_version: ${{ env.XAPI_VERSION }}
-
       - name: Make install smoketest
         run: |
           opam exec -- make install DESTDIR=$(mktemp -d)
@@ -168,3 +163,9 @@ jobs:
           github_token: ${{ secrets.github_token }}
           reporter: github-pr-review
           level: error
+
+  test-sdk-builds:
+    name: Test SDK builds 
+    uses: ./.github/workflows/generate-and-build-sdks.yml
+    with:
+      xapi_version: "0.0.0"
