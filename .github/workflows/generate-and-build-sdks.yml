@@ -15,6 +15,12 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
+      - name: Download XE_SR_ERRORCODES.xml
+        shell: bash
+        run: |
+          mkdir -p /opt/xensource/sm
+          wget -O /opt/xensource/sm/XE_SR_ERRORCODES.xml https://raw.githubusercontent.com/xapi-project/sm/master/drivers/XE_SR_ERRORCODES.xml
+
       - name: Setup XenAPI environment
         uses: ./.github/workflows/setup-xapi-environment
         with:
@@ -129,7 +135,7 @@ jobs:
           New-Item -Path "." -Name "output" -ItemType "directory"
           Copy-Item -Verbose "source\README_51.md" -Destination "output"  -Force
           Copy-Item -Verbose "source\LICENSE" -Destination "output" -Force
-          Copy-Item -Path "source\src\bin\Release\net45\*" -Include ".dll" "output\"
+          Copy-Item -Path "source\src\bin\Release\net45\*" -Include "*.dll" "output\"
           Get-ChildItem -Path "source" |`
           Where-Object { $_.Extension -eq ".ps1" -or $_.Extension -eq ".ps1xml" -or $_.Extension -eq ".psd1" -or $_.Extension -eq ".txt"  } |`
           ForEach-Object -Process { Copy-Item -Verbose $_.FullName -Destination "output" }
@@ -199,7 +205,7 @@ jobs:
           New-Item -Path "." -Name "output" -ItemType "directory"
           Copy-Item -Verbose "source\README.md" -Destination "output"  -Force
           Copy-Item -Verbose "source\LICENSE" -Destination "output" -Force
-          Copy-Item -Path "source\src\bin\Release\net${{ matrix.dotnet }}.0\*" -Include ".dll" "output\"
+          Copy-Item -Path "source\src\bin\Release\net${{ matrix.dotnet }}.0\*" -Include "*.dll" "output\"
           Get-ChildItem -Path "source" |`
           Where-Object { $_.Extension -eq ".ps1" -or $_.Extension -eq ".ps1xml" -or $_.Extension -eq ".psd1" -or $_.Extension -eq ".txt"  } |`
           ForEach-Object -Process { Copy-Item -Verbose $_.FullName -Destination "output" }
