@@ -118,9 +118,6 @@ public class {{class_name}} extends XenAPIObject {
             {{#fields}}
             map.put("{{{name}}}", this.{{{name_camel}}} == null ? {{{default_value}}} : this.{{{name_camel}}});
             {{/fields}}
-            {{#is_event_class}}
-                print.printf("%1$20s: %2$s\n", "snapshot", this.snapshot);
-            {{/is_event_class}}
             return map;
         }
 
@@ -152,7 +149,7 @@ public class {{class_name}} extends XenAPIObject {
     * @deprecated since {{{deprecated_release}}}{{/is_deprecated}}
     *
     * @param c The connection the call is made on{{#parameters}}
-    * @param {{{name_camel}}} {{^description}}No description{{/description}}{{#description}}{{{.}}}{{/description}} {{{publish_info}}}{{/parameters}}{{^returns_void}}
+    * @param {{{name_camel}}} {{{description}}} {{{publish_info}}}{{/parameters}}{{^returns_void}}
     * @return {{#is_async}}Task{{/is_async}}{{^is_async}}{{{return_description}}}{{/is_async}}{{/returns_void}}
     * @throws BadServerResponse Thrown if the response from the server contains an invalid status.
     * @throws XenAPIException if the call failed.
