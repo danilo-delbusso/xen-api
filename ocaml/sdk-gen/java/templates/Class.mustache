@@ -118,9 +118,6 @@ public class {{class_name}} extends XenAPIObject {
             {{#fields}}
             map.put("{{{name}}}", this.{{{name_camel}}} == null ? {{{default_value}}} : this.{{{name_camel}}});
             {{/fields}}
-            {{#is_event_class}}
-                print.printf("%1$20s: %2$s\n", "snapshot", this.snapshot);
-            {{/is_event_class}}
             return map;
         }
 
