@@ -526,13 +526,13 @@ let get_message_formatted_parameters parameters message =
       let description = escape_xml parameter.param_doc in
       `O
         [
-          ("type", `String (get_java_type parameter.param_type))
+          ("type", `String (get_java_type parameter.param_type))  
         ; ( "is_record"
           , `Bool
               (match parameter.param_type with Record _ -> true | _ -> false)
           )
         ; ("name_camel", `String name_camel)
-        ; ("description", `String description)
+        ; ("description", `String (if description = "" then "No description" else description))
         ; ("publish_info", `String publish_info)
         ]
     )
@@ -728,9 +728,6 @@ let get_class_methods_json cls =
 (* Populate JSON object for the class template *)
 (***********************************************)
 let populate_class cls templdir class_dir =
-  (*todo: is this still neeeded?!*)
-  Hashtbl.replace records cls.name cls.contents ;
-
   let class_name = class_case cls.name in
   let fields = get_class_fields_json cls in
   let methods = get_class_methods_json cls in
