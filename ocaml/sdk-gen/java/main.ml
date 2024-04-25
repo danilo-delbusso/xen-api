@@ -221,11 +221,7 @@ let field_default = function
   | Option _ ->
       "null"
 
-(* Generate the class *)
-
 let class_is_empty cls = cls.contents = []
-
-
 
 (*This generates the special case code for marshalling the snapshot field in an Event.Record*)
 
@@ -363,103 +359,107 @@ let rec gen_marshall_body = function
 let gen_error_field_name field =
   camel_case (String.concat "_" (Astring.String.cuts ~sep:" " field))
 
-(* Now run it *)
-
 let populate_releases templdir class_dir =
   render_file
     ("APIVersion.mustache", "APIVersion.java")
     json_releases templdir class_dir
 
-let populate_types templdir class_dir =
+(*
+  Populate JSON object for the Types.java template     
+*)
+let get_types_errors_json =
   let list_errors =
     Hashtbl.fold (fun k v acc -> (k, v) :: acc) Datamodel.errors []
   in
-  let errors =
-    List.map
-      (fun (_, error) ->
-        let class_name = exception_class_case error.err_name in
-        let err_params =
-          List.mapi
-            (fun index value ->
-              `O
-                [
-                  ("name", `String (gen_error_field_name value))
-                ; ("index", `Float (Int.to_float index))
-                ; ("last", `Bool (index == List.length error.err_params - 1))
-                ]
-            )
-            error.err_params
-        in
-        `O
-          [
-            ("description", `String (escape_xml error.err_doc))
-          ; ("class_name", `String class_name)
-          ; ("err_params", `A err_params)
-          ]
-      )
-      list_errors
-  in
+  List.map
+    (fun (_, error) ->
+      let class_name = exception_class_case error.err_name in
+      let err_params =
+        List.mapi
+          (fun index value ->
+            `O
+              [
+                ("name", `String (gen_error_field_name value))
+              ; ("index", `Float (Int.to_float index))
+              ; ("last", `Bool (index == List.length error.err_params - 1))
+              ]
+          )
+          error.err_params
+      in
+      `O
+        [
+          ("description", `String (escape_xml error.err_doc))
+        ; ("class_name", `String class_name)
+        ; ("err_params", `A err_params)
+        ]
+    )
+    list_errors
+
+let get_types_enums_json =
   let list_enums = Hashtbl.fold (fun k v acc -> (k, v) :: acc) enums [] in
-  let enums =
-    List.map
-      (fun (enum_name, enum_values) ->
-        let class_name = class_case enum_name in
-        let mapped_values =
-          List.map
-            (fun (name, description) ->
-              let escaped_description =
-                global_replace (regexp_string "*/") "* /" description
-              in
-              let final_description =
-                global_replace (regexp_string "\n") "\n         * "
-                  escaped_description
-              in
-              `O
-                [
-                  ("name", `String name)
-                ; ("name_uppercase", `String (enum_of_wire name))
-                ; ("description", `String final_description)
-                ]
-            )
-            enum_values
-        in
-        `O [("class_name", `String class_name); ("values", `A mapped_values)]
-      )
-      list_enums
-  in
+  List.map
+    (fun (enum_name, enum_values) ->
+      let class_name = class_case enum_name in
+      let mapped_values =
+        List.map
+          (fun (name, description) ->
+            let escaped_description =
+              global_replace (regexp_string "*/") "* /" description
+            in
+            let final_description =
+              global_replace (regexp_string "\n") "\n         * "
+                escaped_description
+            in
+            `O
+              [
+                ("name", `String name)
+              ; ("name_uppercase", `String (enum_of_wire name))
+              ; ("description", `String final_description)
+              ]
+          )
+          enum_values
+      in
+      `O [("class_name", `String class_name); ("values", `A mapped_values)]
+    )
+    list_enums
+
+let get_types_json types =
   let list_types = TypeSet.fold (fun t acc -> t :: acc) !types [] in
-  let types =
-    List.map
-      (fun t ->
-        let type_string = get_java_type t in
-        let class_name = class_case type_string in
-        let method_name = get_marshall_function t in
-        (*Every type which may be returned by a function may also be the result of the*)
-        (* corresponding asynchronous task. We therefore need to generate corresponding*)
-        (* marshalling functions which can take the raw xml of the tasks result field*)
-        (* and turn it into the corresponding type. Luckily, the only things returned by*)
-        (* asynchronous tasks are object references and strings, so rather than implementing*)
-        (* the general recursive structure we'll just make one for each of the classes*)
-        (* that's been registered as a marshall-needing type*)
-        let generate_reference_task_result_func =
-          match t with Ref _ -> true | _ -> false
-        in
-        `O
-          [
-            ("name", `String type_string)
-          ; ("class_name", `String class_name)
-          ; ("method_name", `String method_name)
-          ; ( "suppress_unchecked_warning"
-            , `Bool (match t with Map _ | Record _ -> true | _ -> false)
-            )
-          ; ( "generate_reference_task_result_func"
-            , `Bool generate_reference_task_result_func
-            )
-          ; ("method_body", `String (gen_marshall_body t))
-          ]
-      )
-      list_types
-  in
+  List.map
+    (fun t ->
+      let type_string = get_java_type t in
+      let class_name = class_case type_string in
+      let method_name = get_marshall_function t in
+      (*Every type which may be returned by a function may also be the result of the*)
+      (* corresponding asynchronous task. We therefore need to generate corresponding*)
+      (* marshalling functions which can take the raw xml of the tasks result field*)
+      (* and turn it into the corresponding type. Luckily, the only things returned by*)
+      (* asynchronous tasks are object references and strings, so rather than implementing*)
+      (* the general recursive structure we'll just make one for each of the classes*)
+      (* that's been registered as a marshall-needing type*)
+      let generate_reference_task_result_func =
+        match t with Ref _ -> true | _ -> false
+      in
+      `O
+        [
+          ("name", `String type_string)
+        ; ("class_name", `String class_name)
+        ; ("method_name", `String method_name)
+        ; ( "suppress_unchecked_warning"
+          , `Bool (match t with Map _ | Record _ -> true | _ -> false)
+          )
+        ; ( "generate_reference_task_result_func"
+          , `Bool generate_reference_task_result_func
+          )
+        ; ("method_body", `String (gen_marshall_body t))
+        ]
+    )
+    list_types
+
+let populate_types types templdir class_dir =
+  let errors = get_types_errors_json in
+  let enums = get_types_enums_json in
+  let types = get_types_json types in
   let json =
     `O [("errors", `A errors); ("enums", `A enums); ("types", `A types)]
   in
@@ -715,7 +715,7 @@ let _ =
   let templdir = "templates" in
   let class_dir = "autogen/xen-api/src/main/java/com/xensource/xenapi" in
   populate_releases templdir class_dir ;
-  populate_types templdir class_dir ;
+  populate_types types templdir class_dir ;
   List.iter (fun cls -> populate_class cls templdir class_dir) classes ;
 
   let uncommented_license = string_of_file "LICENSE" in
