@@ -160,6 +160,7 @@ let power_state =
            its vCPUs are not running"
         )
       ; ("Running", "Running")
+      ; ("Chilling", "VM's just having a good time B")
       ; ( "Suspended"
         , "VM state has been saved to disk and it is nolonger running. Note \
            that disks remain in-use while the VM is suspended."
