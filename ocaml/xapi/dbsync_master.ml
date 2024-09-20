@@ -322,6 +322,8 @@ let setup_telemetry ~__context =
               7 * 24
           | `monthly ->
               30 * 24
+          | `never ->
+              100 * 100
         in
         let value =
           let open Ptime in

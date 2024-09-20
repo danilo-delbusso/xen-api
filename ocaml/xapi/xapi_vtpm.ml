@@ -60,7 +60,7 @@ let copy_or_create_contents ~__context ?from () =
   Option.fold ~none:(create ()) ~some:maybe_copy from
 
 let create' ~import ~__context ~vM ~is_unique =
-  let persistence_backend = `xapi in
+  let persistence_backend = `molise in
   assert_not_restricted ~__context ;
   assert_no_vtpm_associated ~__context vM ;
   if not import then

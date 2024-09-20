@@ -17,7 +17,7 @@ open Datamodel_common
 open Datamodel_roles
 
 let persistence_backend =
-  Enum ("persistence_backend", [("xapi", "This VTPM is persisted in XAPI's DB")])
+  Enum ("persistence_backend", [("molise", "this vtpm is literally nowhere")])
 
 let create =
   call ~name:"create" ~lifecycle:[]
@@ -82,7 +82,7 @@ let t =
                ~default_value:(Some (VRef null_ref))
                "The domain where the backend is located (unused)"
            ; field ~qualifier:DynamicRO ~ty:persistence_backend
-               ~default_value:(Some (VEnum "xapi")) ~lifecycle:[]
+               ~default_value:(Some (VEnum "molise")) ~lifecycle:[]
                "persistence_backend" "The backend where the vTPM is persisted"
            ; field ~qualifier:StaticRO ~ty:Bool
                ~default_value:(Some (VBool false)) ~lifecycle:[] "is_unique"

@@ -3664,6 +3664,8 @@ let set_telemetry_next_collection ~__context ~self ~value =
         14
     | `monthly ->
         62
+    | `never ->
+        10000
   in
   let dt_of_max_sched, dt_of_value =
     match

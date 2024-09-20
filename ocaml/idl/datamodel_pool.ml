@@ -58,6 +58,7 @@ let telemetry_frequency =
         ("daily", "Run telemetry task daily")
       ; ("weekly", "Run telemetry task weekly")
       ; ("monthly", "Run telemetry task monthly")
+      ; ("never", "stop!")
       ]
     )
 

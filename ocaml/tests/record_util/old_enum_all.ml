@@ -38,7 +38,7 @@ let all_cls =
 
 let all_console_protocol = [`vt100; `rfb; `rdp]
 
-let all_persistence_backend = [`xapi]
+let all_persistence_backend = [`molise]
 
 let all_vtpm_operations = [`destroy]
 
@@ -267,7 +267,7 @@ let all_after_apply_guidance =
 
 let all_update_sync_frequency = [`daily; `weekly]
 
-let all_telemetry_frequency = [`daily; `weekly; `monthly]
+let all_telemetry_frequency = [`daily; `weekly; `monthly; `never]
 
 let all_pool_allowed_operations =
   [

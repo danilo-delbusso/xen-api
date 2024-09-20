@@ -627,6 +627,8 @@ let telemetry_frequency_to_string = function
       "weekly"
   | `monthly ->
       "monthly"
+  | `never ->
+      "never"
 
 let task_allowed_operations_to_string s =
   match s with `cancel -> "Cancel" | `destroy -> "Destroy"
